@@ -1,0 +1,168 @@
+@startuml
+class com.wsh.homework.Internet.internetConnection {
++ int responseCode
+}
+
+class com.wsh.homework.PhotoListActivity {
+- PhotoViewModel photoViewModel
+- PhotoAdapter adapter
+- ExecutorService executorService
+# void onCreate(Bundle)
+- void sendPhotoToServer(Photo)
+}
+
+
+interface com.wsh.homework.dao.photoDao {
+~ void insert(Photo)
+~ LiveData<List<Photo>> getALlPhotos()
+~ void update(Photo)
+}
+
+class com.wsh.homework.model.ImageAnalyzer {
+- Interpreter interpreter
+- MediaPlayer mediaPlayer
+- Context context
+- String[] labels
++ String analyzeFrame(Bitmap)
+- void playDefaultRingtone(MediaPlayer)
+- void parseOutput(TensorBuffer,List<RectF>,List<String>)
+- void drawBoundingBoxes(Bitmap,List<RectF>,List<String>)
+- void drawLabel(Canvas,RectF,String,Paint)
+- Bitmap padBitmap(Bitmap,int,int)
+}
+
+
+class com.wsh.homework.CameraActivity {
+- {static} int REQUEST_CAMERA_PERMISSION
+- {static} long FRAME_PROCESS_INTERVAL_MS
+- long lastFrameProcessedTime
+- TextureView textureView
+- ImageAnalyzer imageAnalyzer
+- Camera2Manager camera2Manager
+- Bitmap latestAnalyzedBitmap
+- MediaPlayer mediaPlayer
+# void onCreate(Bundle)
+# void onResume()
+# void onPause()
+# void onDestroy()
+- void requestCameraPermission()
++ void onRequestPermissionsResult(int,String[],int[])
+- void takePhoto()
+- void saveImageAndResult(Bitmap,String)
+- void saveToDatabase(String,String)
+- String assetFilePath(Context,String)
+- Bitmap imageToBitmap(Image)
+- Bitmap rotateBitmap(Bitmap,int)
+- void stopRingtone()
+}
+
+
+class com.wsh.homework.model.Camera2Manager {
+- {static} String TAG
+- Context context
+- TextureView textureView
+- Size previewSize
+- ImageReader.OnImageAvailableListener onImageAvailableListener
+- CameraDevice cameraDevice
+- CameraCaptureSession captureSession
+- ImageReader imageReader
+- CameraDevice.StateCallback stateCallback
+- CameraCaptureSession.CaptureCallback captureCallback
++ void startCamera()
++ void stopCamera()
+- String getCameraId(CameraManager)
+- void startPreview()
+}
+
+
+class com.wsh.homework.PhotoViewModel {
+- photoRepository repository
+- LiveData<List<Photo>> allPhotos
++ LiveData<List<Photo>> getAllPhotos()
++ void insert(Photo)
++ void update(Photo)
+}
+
+
+class com.wsh.homework.ResultActivity {
+- String result
+- String photoPath
+- AppDatabase db
+- ImageView image
+# void onCreate(Bundle)
+- void saveResult(boolean)
+}
+
+
+class com.wsh.homework.MainActivity {
+# void onCreate(Bundle)
+}
+
+class com.wsh.homework.dao.photoRepository {
+- photoDao photoDao
+- LiveData<List<Photo>> allPhotos
++ LiveData<List<Photo>> getAllPhotos()
++ void insert(Photo)
++ void update(Photo)
+}
+
+
+abstract class com.wsh.homework.dao.AppDatabase {
++ {abstract}photoDao photoDao()
+}
+
+class com.wsh.homework.dao.Photo {
++ int id
++ String path
++ String result
++ boolean isApproved
++ int getId()
++ void setId(int)
++ String getPath()
++ void setPath(String)
++ String getResult()
++ void setResult(String)
++ boolean isApproved()
++ void setApproved(boolean)
+}
+
+
+class com.wsh.homework.PhotoAdapter {
+- List<Photo> photoList
+- OnItemClickListener listener
++ PhotoViewHolder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(PhotoViewHolder,int)
++ int getItemCount()
++ void setPhotos(List<Photo>)
+}
+
+
+interface com.wsh.homework.PhotoAdapter$OnItemClickListener {
+~ void onSendClick(Photo)
+~ void onUpdateClick(Photo,String)
+}
+
+class com.wsh.homework.PhotoAdapter$PhotoViewHolder {
+~ ImageView photoImage
+~ EditText photoResultEdit
+~ Button sendButton
+~ Button editButton
+~ Button updateButton
+~ TextView resulTextView
++ void bind(Photo,OnItemClickListener)
+}
+
+
+
+
+androidx.appcompat.app.AppCompatActivity <|-- com.wsh.homework.PhotoListActivity
+androidx.appcompat.app.AppCompatActivity <|-- com.wsh.homework.CameraActivity
+androidx.lifecycle.AndroidViewModel <|-- com.wsh.homework.PhotoViewModel
+androidx.appcompat.app.AppCompatActivity <|-- com.wsh.homework.ResultActivity
+androidx.appcompat.app.AppCompatActivity <|-- com.wsh.homework.MainActivity
+androidx.room.RoomDatabase <|-- com.wsh.homework.dao.AppDatabase
+com.wsh.homework.Adapter <|-- com.wsh.homework.PhotoAdapter
+com.wsh.homework.PhotoAdapter +.. com.wsh.homework.PhotoAdapter$OnItemClickListener
+com.wsh.homework.PhotoAdapter +.. com.wsh.homework.PhotoAdapter$PhotoViewHolder
+com.wsh.homework.ViewHolder <|-- com.wsh.homework.PhotoAdapter$PhotoViewHolder
+@enduml
